@@ -121,4 +121,4 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           image-name: infra-yandex-vm-starter
           dockerfile: Dockerfile
-          image-tags: latest ${{ needs.prepare.outputs.version }}
+          image-tags: ${{ needs.prepare.outputs.version }}
