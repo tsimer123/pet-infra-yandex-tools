@@ -113,3 +113,12 @@ jobs:
         run: |
           touch .env
           make build
+
+      - name: Build and publish Docker image
+        if: ${{github.ref == 'refs/heads/main'}}
+        uses: VaultVulp/gp-docker-action@1.6.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image-name: infra-yandex-vm-starter
+          dockerfile: Dockerfile
+          image-tags: latest ${{ needs.prepare.outputs.version }}
