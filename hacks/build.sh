@@ -20,5 +20,5 @@ ldflags+=" -X github.com/prometheus/common/version.Version=${version}"
 
 GOOS=${OS:-'linux'} GOARCH='amd64' CGO_ENABLED=0 go build \
     -ldflags="${ldflags}" \
-    -o "${project_dir}/bin" \
+    -o "${project_dir}/bin/" \
     "${project_dir}/cmd"

@@ -31,9 +31,30 @@ jobs:
           message: ${{ format('[CI] Bump version to {0}', inputs.version) }}
           branch: main
 
-      - name: Publish to GitHub
-        uses: elgohr/Github-Release-Action@v4
-        env:
-          GITHUB_TOKEN: ${{ github.RELEASE_TOKEN }}
+      - name: Setup Golang
+        uses: actions/setup-go@v3
         with:
-          title: ${{ github.event.inputs.release-title }}
+          go-version: ${{ env.GOLANG_VERSION }}
+
+      - name: Caches
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build binary
+        env:
+          OS: linux
+          COMMIT: ${{ needs.prepare.outputs.commit }}
+          BRANCH: ${{ needs.prepare.outputs.branch }}
+        run: |
+          touch .env
+          make build
+
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "./app"
+          name: ${{ github.event.inputs.release-title }}
+          tag: ${{ github.event.inputs.version }}

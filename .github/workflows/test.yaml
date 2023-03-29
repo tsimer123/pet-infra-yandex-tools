@@ -96,6 +96,7 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GOLANG_VERSION }}
+          
       - name: Caches
         uses: actions/cache@v3
         with:
@@ -112,11 +113,3 @@ jobs:
         run: |
           touch .env
           make build
-
-      - name: Create a Release
-        if: ${{github.ref == 'refs/heads/main'}}
-        uses: elgohr/Github-Release-Action@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        with:
-          title: MyReleaseMessage
