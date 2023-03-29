@@ -1,0 +1,115 @@
+---
+name: Testing
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - "*.md"
+      - "**/*.md"
+
+env:
+  GOLANG_VERSION: "1.20"
+  GOLANG_LINT_VERSION: "v1.52.2"
+
+jobs:
+  prepare:
+    name: Prepare variables
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.prepare.outputs.version }}
+      commit: ${{ steps.prepare.outputs.commit }}
+      branch: ${{ steps.prepare.outputs.branch }}
+    steps:
+      - name: Prepare variables
+        id: prepare
+        shell: bash
+        run: |
+          BRANCH=$(echo ${GITHUB_REF#refs/heads/})
+          COMMIT_SHA_SHORT=$(echo ${GITHUB_SHA} | cut -c1-7)
+          echo "version=$(echo ${BRANCH}-${COMMIT_SHA_SHORT})" >> $GITHUB_OUTPUT
+          echo "commit=$(echo ${COMMIT_SHA_SHORT})" >> $GITHUB_OUTPUT
+          echo "branch=$(echo ${BRANCH})" >> $GITHUB_OUTPUT
+
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ env.GOLANG_LINT_VERSION }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          args: "--fix=false"
+
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+      - name: Caches
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Install dependencies
+        run: |
+          go mod download
+      - name: Check tidiness
+        run: |
+          touch .env
+          make tidy
+          if [[ $(git diff --stat) != '' ]]; then
+            git diff
+            echo 'run `make tidy` and commit changes'
+            exit 1
+          fi
+      - name: Run unit tests
+        run: |
+          make test
+
+  build:
+    name: Build docker image
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - lint
+      - test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+          
+      - name: Caches
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build binary
+        env:
+          OS: linux
+          COMMIT: ${{ needs.prepare.outputs.commit }}
+          BRANCH: ${{ needs.prepare.outputs.branch }}
+        run: |
+          touch .env
+          make build
