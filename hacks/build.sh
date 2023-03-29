@@ -9,10 +9,6 @@ project_dir="$(
     pwd
 )"
 
-if [[ -z ${APP} ]]; then
-    APP="web"
-fi
-
 commit=${COMMIT:-"$(git rev-parse --short HEAD)"}
 branch=${BRANCH:-"$(git rev-parse --abbrev-ref HEAD)"}
 version=${branch}-${commit}
@@ -24,5 +20,5 @@ ldflags+=" -X github.com/prometheus/common/version.Version=${version}"
 
 GOOS=${OS:-'linux'} GOARCH='amd64' CGO_ENABLED=0 go build \
     -ldflags="${ldflags}" \
-    -o "${project_dir}/bin/${APP}" \
-    "${project_dir}/cmd/${APP}"
+    -o "${project_dir}/bin" \
+    "${project_dir}/cmd"

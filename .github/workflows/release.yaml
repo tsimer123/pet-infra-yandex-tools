@@ -1,0 +1,39 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-title:
+        description: 'Release Title'
+        required: false
+      version:
+        description: 'App Version'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_VERSION: ${{github.ref_name}}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Bump version
+        run: ./.github/scripts/bumpVersion.sh
+        env:
+          VERSION: ${{ inputs.version }}
+
+      - name: Commit version bump
+        uses: EndBug/add-and-commit@v7
+        with:
+          add: ./gradle.properties
+          message: ${{ format('[CI] Bump version to {0}', inputs.version) }}
+          branch: main
+
+      - name: Publish to GitHub
+        uses: elgohr/Github-Release-Action@v4
+        env:
+          GITHUB_TOKEN: ${{ github.RELEASE_TOKEN }}
+        with:
+          title: ${{ github.event.inputs.release-title }}
