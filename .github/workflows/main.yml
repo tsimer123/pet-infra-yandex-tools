@@ -118,7 +118,7 @@ jobs:
         #if: ${{github.ref == 'refs/heads/main'}}
         uses: VaultVulp/gp-docker-action@1.6.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.ARTIFACT_SECRET }}
           image-name: infra-yandex-vm-starter
           dockerfile: Dockerfile
           image-tag: ${{ needs.prepare.outputs.version }}
