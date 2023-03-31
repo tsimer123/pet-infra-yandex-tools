@@ -37,6 +37,7 @@ help:
 	@echo "  ${YELLOW}tidy                      ${RESET} Run tidy for go module to remove unused dependencies"
 	@echo "  ${YELLOW}job-list                  ${RESET} View all implemented jobs"
 	@echo "  ${YELLOW}job-build                 ${RESET} Build specific job locally. Requires argument JOB"
+	@echo "  ${YELLOW}job-build-all             ${RESET} Build specific job locally. Requires argument JOB"
 	@echo "  ${YELLOW}job-build-docker          ${RESET} Build specific job locally and create docker image. Requires argument JOB"
 	@echo "  ${YELLOW}job-build-docker-all      ${RESET} Build all jobs locally and create docker images"
 	@echo "  ${YELLOW}job-push-docker           ${RESET} Push specific job to docker registry. Requires argument JOB"
@@ -65,6 +66,11 @@ job-build:
 	mkdir -p ./cmd/${JOB}/bin/config && \
 	cp ./cmd/${JOB}/config/config.json ./cmd/${JOB}/bin/config && \
 	GOOS=$(BUILD_OS) GOARCH=$(BUILD_ARCH) CGO_ENABLED=0 go build -v -o ./cmd/${JOB}/bin/${JOB} ./cmd/${JOB}
+
+.PHONY: job-build-all
+job-build-all: BUILD_OS = linux
+job-build-all:
+	make -s job-list | xargs -I % make -s JOB=% job-build 2>/dev/null
 
 .PHONY: job-build-docker
 job-build-docker: BUILD_OS = linux
