@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/tsimer123/pet-infra-yandex-vm-starter/internal/options"
+	"github.com/tsimer123/pet-infra-yandex-tools/internal/options"
 )
 
 type JWT struct {
