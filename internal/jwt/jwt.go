@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/sirupsen/logrus"
-	"github.com/tsimer123/pet-infra-yandex-tools/internal/options"
+	"github.com/tsimer123/pet-infra-yandex-tools/internal/env"
 )
 
 type JWT struct {
@@ -21,11 +21,11 @@ type JWT struct {
 	keyFile          string
 }
 
-func NewJWT(o *options.Options) *JWT {
+func NewJWT(o *env.Options) *JWT {
 	return &JWT{
-		keyID:            o.GWTkeyID,
-		serviceAccountID: o.GWTserviceAccountID,
-		keyFile:          o.GWTkeyFile,
+		keyID:            o.YaJWTkeyID,
+		serviceAccountID: o.YaJWTserviceAccountID,
+		keyFile:          o.YaJWTkeyFile,
 	}
 }
 
@@ -61,7 +61,7 @@ func (t *JWT) loadPrivateKey() *rsa.PrivateKey {
 		logrus.Errorf("Error parsing private key: %s", err)
 	}
 
-	logrus.Infof("Loaded private key: %s", rsaPrivateKey)
+	logrus.Infof("Private key: %s", "<sensitive value>")
 
 	return rsaPrivateKey
 }

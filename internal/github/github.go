@@ -1,4 +1,4 @@
-package location
+package github
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-github/v45/github"
 	"github.com/sirupsen/logrus"
+	"github.com/tsimer123/pet-infra-yandex-tools/internal/env"
 	"golang.org/x/crypto/nacl/box"
 	"golang.org/x/oauth2"
 )
@@ -20,21 +21,26 @@ type GitHubActionsService interface {
 
 // GitHub type
 type GitHub struct {
-	Base64Decode bool
-	KeyIDEnvVar  string
-	KeyEnvVar    string
-	Owner        string
-	Repo         string
+	Token, Owner, Repo, SecretName string
 }
 
-func UpdateSecret(token, owner, repo, secretName, secretValue string) {
-	ctx, client, err := githubAuth(token)
+func NewGithub(o *env.Options) *GitHub {
+	return &GitHub{
+		Token:      o.GithubToken,
+		Owner:      o.GithubOwner,
+		Repo:       o.GithubRepo,
+		SecretName: o.GithubSecretName,
+	}
+}
+
+func (t *GitHub) UpdateSecret(secretValue string) {
+	ctx, client, err := githubAuth(t.Token)
 	if err != nil {
 		logrus.Fatalf("Unable to authenticate to GitHub: %v", err)
 	}
 
 	actionsService := client.Actions
-	if err := addRepoSecret(ctx, actionsService, owner, repo, secretName, secretValue); err != nil {
+	if err := addRepoSecret(ctx, actionsService, t.Owner, t.Repo, t.SecretName, secretValue); err != nil {
 		logrus.Fatalf("Unable to add secret to GitHub: %v", err)
 	}
 }
