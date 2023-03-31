@@ -16,7 +16,7 @@ func NewOptionsFromEnv() *Options {
 type Options struct {
 	YaJWTkeyID            string `env:"YA_JWT_KEY_ID"`
 	YaJWTserviceAccountID string `env:"YA_JWT_SERVICE_ACCOUNT_ID"`
-	YaJWTkeyFile          string `env:"YA_JWT_KEY_FILE"`
+	YaJWTkey              string `env:"YA_JWT_KEY_BASE64"`
 	GithubToken           string `env:"GITHUB_TOKEN"`
 	GithubOwner           string `env:"GITHUB_OWNER"`
 	GithubRepo            string `env:"GITHUB_REPO"`

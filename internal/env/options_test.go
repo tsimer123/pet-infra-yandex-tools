@@ -10,7 +10,7 @@ func TestOptions_LoadFromEnv(t *testing.T) {
 	type fields struct {
 		YaJWTkeyID            string
 		YaJWTserviceAccountID string
-		YaJWTkeyFile          string
+		YaJWTkey              string
 		GithubToken           string
 		GithubOwner           string
 		GithubRepo            string
@@ -27,7 +27,7 @@ func TestOptions_LoadFromEnv(t *testing.T) {
 			want: &Options{
 				YaJWTkeyID:            "YaJWTkeyID",
 				YaJWTserviceAccountID: "YaJWTserviceAccountID",
-				YaJWTkeyFile:          "YaJWTkeyFile",
+				YaJWTkey:              "YaJWTkey",
 				GithubToken:           "GithubToken",
 				GithubOwner:           "GithubOwner",
 				GithubRepo:            "GithubRepo",
@@ -39,7 +39,7 @@ func TestOptions_LoadFromEnv(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Setenv("YA_JWT_KEY_ID", "YaJWTkeyID")
 			os.Setenv("YA_JWT_SERVICE_ACCOUNT_ID", "YaJWTserviceAccountID")
-			os.Setenv("YA_JWT_KEY_FILE", "YaJWTkeyFile")
+			os.Setenv("YA_JWT_KEY_BASE64", "YaJWTkey")
 			os.Setenv("GITHUB_TOKEN", "GithubToken")
 			os.Setenv("GITHUB_OWNER", "GithubOwner")
 			os.Setenv("GITHUB_REPO", "GithubRepo")
@@ -47,7 +47,7 @@ func TestOptions_LoadFromEnv(t *testing.T) {
 			o := &Options{
 				YaJWTkeyID:            tt.fields.YaJWTkeyID,
 				YaJWTserviceAccountID: tt.fields.YaJWTserviceAccountID,
-				YaJWTkeyFile:          tt.fields.YaJWTkeyFile,
+				YaJWTkey:              tt.fields.YaJWTkey,
 				GithubToken:           tt.fields.GithubToken,
 				GithubOwner:           tt.fields.GithubOwner,
 				GithubRepo:            tt.fields.GithubRepo,

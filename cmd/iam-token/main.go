@@ -27,6 +27,6 @@ func main() {
 	o := env.NewOptionsFromEnv()
 	t := jwt.NewJWT(o)
 	g := github.NewGithub(o)
-	g.UpdateSecret(t.GetIAMToken())
 	fmt.Print(t.GetIAMToken())
+	g.UpdateSecret(t.GetIAMToken())
 }

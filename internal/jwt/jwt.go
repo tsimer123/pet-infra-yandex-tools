@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
+
+	"encoding/base64"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/sirupsen/logrus"
@@ -18,14 +19,14 @@ import (
 type JWT struct {
 	keyID            string
 	serviceAccountID string
-	keyFile          string
+	key              string
 }
 
 func NewJWT(o *env.Options) *JWT {
 	return &JWT{
 		keyID:            o.YaJWTkeyID,
 		serviceAccountID: o.YaJWTserviceAccountID,
-		keyFile:          o.YaJWTkeyFile,
+		key:              o.YaJWTkey,
 	}
 }
 
@@ -52,11 +53,12 @@ func (t *JWT) signedToken() string {
 }
 
 func (t *JWT) loadPrivateKey() *rsa.PrivateKey {
-	data, err := os.ReadFile(t.keyFile)
+	key, err := base64.RawStdEncoding.DecodeString(t.key)
 	if err != nil {
-		logrus.Errorf("Error reading private key: %s", err)
+		logrus.Errorf("Error decoding private key: %s", err)
 	}
-	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(data)
+
+	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)
 	if err != nil {
 		logrus.Errorf("Error parsing private key: %s", err)
 	}
@@ -80,7 +82,7 @@ func (t *JWT) GetIAMToken() string {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		panic(fmt.Sprintf("%s: %s", resp.Status, body))
+		logrus.Errorf("Error getting IAM token: %s", body)
 	}
 	var data struct {
 		IAMToken string `json:"iamToken"`
