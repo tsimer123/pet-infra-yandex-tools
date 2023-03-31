@@ -21,9 +21,6 @@ ifeq ($(BUILD_ARCH),aarch64)
 	BUILD_ARCH = arm64
 endif
 
-include .env
-export $(shell sed 's/=.*//' .env)
-
 .PHONY: help
 help:
 	@echo ''
