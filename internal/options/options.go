@@ -4,6 +4,7 @@ package options
 
 import (
 	"github.com/caarlos0/env/v6"
+	"github.com/sirupsen/logrus"
 )
 
 func NewOptionsFromEnv() *Options {
@@ -23,6 +24,8 @@ func (o *Options) loadFromEnv() *Options {
 	if err := env.Parse(&options); err != nil {
 		panic(err)
 	}
+
+	logrus.Infof("Options: %+v", options)
 
 	return &options
 }

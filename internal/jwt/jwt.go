@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/sirupsen/logrus"
 	"github.com/tsimer123/pet-infra-yandex-tools/internal/options"
 )
 
@@ -42,20 +43,26 @@ func (t *JWT) signedToken() string {
 	privateKey := t.loadPrivateKey()
 	signed, err := token.SignedString(privateKey)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error signing token: %s", err)
 	}
+
+	logrus.Infof("Signed token: %s", signed)
+
 	return signed
 }
 
 func (t *JWT) loadPrivateKey() *rsa.PrivateKey {
 	data, err := os.ReadFile(t.keyFile)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error reading private key: %s", err)
 	}
 	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(data)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error parsing private key: %s", err)
 	}
+
+	logrus.Infof("Loaded private key: %s", rsaPrivateKey)
+
 	return rsaPrivateKey
 }
 
@@ -68,7 +75,7 @@ func (t *JWT) GetIAMToken() string {
 		strings.NewReader(fmt.Sprintf(`{"jwt":"%s"}`, jot)),
 	)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error getting IAM token: %s", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
@@ -80,7 +87,10 @@ func (t *JWT) GetIAMToken() string {
 	}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error decoding response: %s", err)
 	}
+
+	logrus.Infof("Got IAM token: %s", "<sensitive value>")
+
 	return data.IAMToken
 }
