@@ -94,8 +94,8 @@ jobs:
             ${{ runner.os }}-go-
 
       # Debugging action
-      - name: Set up tmate
-        uses: mxschmitt/action-tmate@v3
+      # - name: Set up tmate
+      #   uses: mxschmitt/action-tmate@v3
       
       - name: Build Docker images
         run: make job-build-docker-all
