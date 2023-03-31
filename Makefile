@@ -86,7 +86,7 @@ job-build-docker: job-build
 .PHONY: job-build-docker-all
 job-build-docker-all: BUILD_OS = linux
 job-build-docker-all:
-	make -s job-list | xargs -I % make -s JOB=% job-build-docker
+	make -s job-list | xargs -I % make -s JOB=% job-build-docker 2>/dev/null
 
 .PHONY: job-push-docker
 job-push-docker: BUILD_OS = linux

@@ -13,23 +13,6 @@ env:
   GOLANG_LINT_VERSION: "v1.52.2"
 
 jobs:
-  prepare:
-    name: Prepare variables
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.prepare.outputs.version }}
-      commit: ${{ steps.prepare.outputs.commit }}
-      branch: ${{ steps.prepare.outputs.branch }}
-    steps:
-      - name: Prepare variables
-        id: prepare
-        shell: bash
-        run: |
-          BRANCH=$(echo ${GITHUB_REF#refs/heads/})
-          COMMIT_SHA_SHORT=$(echo ${GITHUB_SHA} | cut -c1-7)
-          echo "version=$(echo ${BRANCH}-${COMMIT_SHA_SHORT})" >> $GITHUB_OUTPUT
-          echo "commit=$(echo ${COMMIT_SHA_SHORT})" >> $GITHUB_OUTPUT
-          echo "branch=$(echo ${BRANCH})" >> $GITHUB_OUTPUT
 
   lint:
     name: Linting
@@ -85,12 +68,17 @@ jobs:
     name: Build docker images
     runs-on: ubuntu-latest
     needs:
-      - prepare
       - lint
       - test
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Setup Golang
         uses: actions/setup-go@v3
@@ -105,6 +93,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      # Debugging action
+      - name: Set up tmate
+        uses: mxschmitt/action-tmate@v3
+      
       - name: Build Docker images
         run: make job-build-docker-all
 
