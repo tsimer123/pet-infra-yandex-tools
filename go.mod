@@ -1,4 +1,4 @@
-module github.com/tsimer123/pet-infra-yandex-vm-starter
+module github.com/tsimer123/pet-infra-yandex-tools
 
 go 1.20
 

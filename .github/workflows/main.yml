@@ -81,13 +81,17 @@ jobs:
         run: |
           make test
 
-  build:
+  build-package:
     name: Build docker image
     runs-on: ubuntu-latest
     needs:
       - prepare
       - lint
       - test
+    strategy:
+      matrix:
+        app:
+        - iam-token
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -110,15 +114,21 @@ jobs:
           OS: linux
           COMMIT: ${{ needs.prepare.outputs.commit }}
           BRANCH: ${{ needs.prepare.outputs.branch }}
+          APP: ${{ matrix.app }}
         run: |
           touch .env
           make build
 
-      - name: Build and publish Docker image
-        #if: ${{github.ref == 'refs/heads/main'}}
-        uses: VaultVulp/gp-docker-action@1.6.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          github-token: ${{ secrets.ARTIFACT_SECRET }}
-          image-name: infra-yandex-vm-starter
-          dockerfile: Dockerfile
-          image-tag: ${{ needs.prepare.outputs.version }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.ARTIFACT_SECRET }}
+
+      - name: Build Docker images
+        run: make job-build-docker-all
+
+      - name: Push Docker images
+        # if: ${{github.ref == 'refs/heads/main'}}
+        run: make job-push-docker-all
