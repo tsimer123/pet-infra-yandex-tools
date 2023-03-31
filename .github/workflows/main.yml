@@ -147,3 +147,4 @@ jobs:
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "cmd/*/bin/"
+          tag: "v0.0.0-alpha"
