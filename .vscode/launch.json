@@ -5,12 +5,12 @@
     "version": "0.1.0",
     "configurations": [
         {
-            "name": "Launch App",
+            "name": "Launch iam-token",
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${workspaceFolder}/cmd/",
-            "envFile": "${cwd}/.env",
+            "program": "${workspaceFolder}/cmd/iam-token",
+            "envFile": "${cwd}/cmd/iam-token/config/.env",
         },
     ]
 }

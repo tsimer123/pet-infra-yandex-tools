@@ -44,7 +44,7 @@ help:
 
 .PHONY: test
 test:
-	TEST_RUN_ARGS="$(TEST_RUN_ARGS)" TEST_DIR="$(TEST_DIR)" ./hacks/run-tests.sh
+	go test -race -cover -v --tags=unit ./...
 
 .PHONY: lint
 lint:

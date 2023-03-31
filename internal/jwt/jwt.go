@@ -6,25 +6,27 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
+	"encoding/base64"
+
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/tsimer123/pet-infra-yandex-tools/internal/options"
+	"github.com/sirupsen/logrus"
+	"github.com/tsimer123/pet-infra-yandex-tools/internal/env"
 )
 
 type JWT struct {
 	keyID            string
 	serviceAccountID string
-	keyFile          string
+	key              string
 }
 
-func NewJWT(o *options.Options) *JWT {
+func NewJWT(o *env.Options) *JWT {
 	return &JWT{
-		keyID:            o.GWTkeyID,
-		serviceAccountID: o.GWTserviceAccountID,
-		keyFile:          o.GWTkeyFile,
+		keyID:            o.YaJWTkeyID,
+		serviceAccountID: o.YaJWTserviceAccountID,
+		key:              o.YaJWTkey,
 	}
 }
 
@@ -42,20 +44,27 @@ func (t *JWT) signedToken() string {
 	privateKey := t.loadPrivateKey()
 	signed, err := token.SignedString(privateKey)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error signing token: %s", err)
 	}
+
+	logrus.Infof("Signed token: %s", signed)
+
 	return signed
 }
 
 func (t *JWT) loadPrivateKey() *rsa.PrivateKey {
-	data, err := os.ReadFile(t.keyFile)
+	key, err := base64.RawStdEncoding.DecodeString(t.key)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error decoding private key: %s", err)
 	}
-	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(data)
+
+	rsaPrivateKey, err := jwt.ParseRSAPrivateKeyFromPEM(key)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error parsing private key: %s", err)
 	}
+
+	logrus.Infof("Private key: %s", "<sensitive value>")
+
 	return rsaPrivateKey
 }
 
@@ -68,19 +77,22 @@ func (t *JWT) GetIAMToken() string {
 		strings.NewReader(fmt.Sprintf(`{"jwt":"%s"}`, jot)),
 	)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error getting IAM token: %s", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		panic(fmt.Sprintf("%s: %s", resp.Status, body))
+		logrus.Errorf("Error getting IAM token: %s", body)
 	}
 	var data struct {
 		IAMToken string `json:"iamToken"`
 	}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
-		panic(err)
+		logrus.Errorf("Error decoding response: %s", err)
 	}
+
+	logrus.Infof("Got IAM token: %s", "<sensitive value>")
+
 	return data.IAMToken
 }
