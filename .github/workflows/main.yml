@@ -148,3 +148,4 @@ jobs:
         with:
           artifacts: "cmd/*/bin/"
           tag: "v0.0.0-alpha"
+          token:  ${{ secrets.ARTIFACT_SECRET }}
