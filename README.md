@@ -1,5 +1,7 @@
 # Tools for manage yandex cloud
 
+![example workflow](https://github.com/tsimer123/pet-infra-yandex-tools/actions/workflows/main.yml/badge.svg)
+
 ## iam-token
 
 Get IAM token with service account key. Yandex documentation for key creating: https://cloud.yandex.ru/docs/iam/operations/authorized-key/create.
